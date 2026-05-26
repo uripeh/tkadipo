@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web TKA - SMP Diponegoro Sampang</title>
+    <!-- Tailwind CSS v4 Play CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e0e8f5, #b8cbe4);
+            min-height: 100vh;
+        }
+        /* Efek Tombol & Kartu 3D Pop-Out (Neumorphism Soft UI) */
+        .card-3d {
+            background: #e0e8f5;
+            border-radius: 20px;
+            box-shadow: 9px 9px 16px #becadc, -9px -9px 16px #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-3d {
+            background: #e0e8f5;
+            border-radius: 12px;
+            box-shadow: inset 5px 5px 10px #becadc, inset -5px -5px 10px #ffffff;
+            transition: all 0.3s ease;
+        }
+        .btn-3d {
+            background: linear-gradient(145deg, #3b82f6, #1d4ed8);
+            box-shadow: 5px 5px 10px #becadc, -5px -5px 10px #ffffff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-3d:active {
+            transform: scale(0.95);
+            box-shadow: inset 2px 2px 5px #1d4ed8;
+        }
+        .btn-secondary-3d {
+            background: linear-gradient(145deg, #10b981, #047857);
+            box-shadow: 5px 5px 10px #becadc, -5px -5px 10px #ffffff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-secondary-3d:active {
+            transform: scale(0.95);
+            box-shadow: inset 2px 2px 5px #047857;
+        }
+        /* Loading Spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 flex flex-col items-center justify-center relative">
+
+    <!-- Container Utama -->
+    <div class="w-full max-w-md mx-auto my-auto py-6">
+        
+        <!-- Header Madrasah/Sekolah -->
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-extrabold text-blue-900 drop-shadow-sm">SMP DIPONEGORO SAMPANG</h1>
+            <p class="text-sm font-semibold text-blue-600 tracking-wider">APLIKASI TKA & SHTKA</p>
+        </div>
+
+        <!-- Tab Navigasi Menu (Awalnya Sembunyi, Muncul setelah sukses login) -->
+        <div id="tab-navigation" class="flex gap-4 mb-6 p-2 card-3d justify-between hidden">
+        </div>
+
+        <!-- Halaman Login Siswa (Muncul Pertama Kali) -->
+        <div id="page-login" class="card-3d p-6 space-y-5">
+            <div class="text-center">
+                <span class="text-4xl">🔐</span>
+                <h3 class="text-lg font-bold text-gray-700 mt-2">Login Siswa</h3>
+                <p class="text-xs text-gray-500">Masukkan 4 digit nomor induk Anda</p>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Masukkan NIS (4 Digit)</label>
+                <div class="relative">
+                    <input type="text" 
+                           inputmode="numeric" 
+                           pattern="[0-9]*" 
+                           maxlength="4" 
+                           id="login-nis" 
+                           oninput="handleNisInput(this)" 
+                           class="w-full p-4 input-3d text-gray-700 font-bold text-lg tracking-widest text-center focus:outline-none" 
+                           placeholder="Contoh: 1002">
+                    <div id="login-loader" class="absolute right-4 top-4.5 hidden"><div class="loader"></div></div>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Nama Peserta</label>
+                <input type="text" 
+                       id="login-nama" 
+                       class="w-full p-4 input-3d text-gray-500 font-bold text-center bg-gray-200/50 cursor-not-allowed focus:outline-none" 
+                       placeholder="Nama akan muncul otomatis..." 
+                       readonly>
+            </div>
+            
+            <button onclick="handleLoginSuccess()" 
+                    id="btn-submit-login" 
+                    class="w-full py-4 text-white font-bold rounded-xl btn-3d mt-2 opacity-50 cursor-not-allowed transition-all duration-300" 
+                    disabled>
+                Masuk ke Sistem
+            </button>
+        </div>
+
+        <!-- Halaman Pencarian Data TKA (Hanya Terbuka Setelah Sukses Login) -->
+        <div id="page-search" class="card-3d p-6 space-y-5 hidden">
+            <h3 class="text-lg font-bold text-gray-700 text-center mb-2">👤 Profil Anda</h3>
+            <p class="text-xs text-gray-500 text-center -mt-2">Cek profil anda dan catat Nomor Peserta TKA</p>
+            
+            <div class="flex gap-2">
+                <!-- Kolom NIS di halaman profil ini telah dikunci (readonly), diratakan ke tengah, dan diubah warnanya agar terlihat inaktif -->
+                <input type="number" 
+                       id="search-nis" 
+                       class="w-full p-4 input-3d text-gray-500 font-bold text-left bg-gray-200/50 cursor-not-allowed focus:outline-none" 
+                       placeholder="Masukkan NIS..." 
+                       readonly>
+                <!-- Tombol cari manual dinonaktifkan (disabled) dan diberi efek buram -->
+                <button onclick="searchData()" 
+                        id="btn-search-manual"
+                        class="px-5 text-white font-bold rounded-xl btn-3d flex items-center justify-center opacity-50 cursor-not-allowed" 
+                        disabled>
+                    🔍
+                </button>
+            </div>
+
+            <!-- Loader Pencarian -->
+            <div id="search-loader" class="hidden flex justify-center py-4">
+                <div class="loader"></div>
+            </div>
+
+            <!-- Hasil Pencarian -->
+            <div id="result-container" class="hidden space-y-4">
+                <div class="overflow-x-auto rounded-xl shadow-inner bg-white/50 p-2">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-300 text-gray-500 font-bold">
+                                <th class="p-2">Biodata</th>
+                                <th class="p-2">Informasi Siswa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="text-gray-700 font-medium">
+                            <!-- Baris tabel akan diisi secara dinamis melalui JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tombol Aksi TKA & SHTKA -->
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button id="btn-lihat-tka" onclick="actionTKA()" class="py-3 text-white font-bold rounded-xl btn-3d text-center text-sm cursor-pointer">
+                        📄 Lihat TKA
+                    </button>
+                    <button id="btn-cetak-shtka" onclick="actionSHTKA()" class="py-3 text-white font-bold rounded-xl btn-secondary-3d text-center text-sm cursor-pointer">
+                        🎓 Cetak SHTKA
+                    </button>
+                </div>
+            </div>
+            
+            <p id="search-error" class="text-red-500 text-center text-xs font-semibold hidden">Data NIS tidak ditemukan pada database TKA!</p>
+        </div>
+
+    </div>
+
+    <!-- Sistem Modal Custom / Dialog Box -->
+    <div id="custom-modal" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+        <div class="card-3d p-6 max-w-sm w-full space-y-4 text-center transform scale-95 transition-transform duration-300" id="modal-box">
+            <div class="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-3xl shadow-inner" id="modal-icon">
+                🔔
+            </div>
+            <h4 class="text-xl font-bold text-gray-800" id="modal-title">Pemberitahuan</h4>
+            <div class="text-sm text-gray-600 font-medium max-h-60 overflow-y-auto text-left px-2" id="modal-message">Pesan notifikasi di sini.</div>
+            <button onclick="closeModal()" class="w-full py-3 text-white font-bold rounded-xl btn-3d cursor-pointer">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Tautan API Google Apps Script
+        const API_URL = "https://script.google.com/macros/s/AKfycbxZgsZhPGoxZsw6N-01Yy05mhh0t1fH53MwQoXMfFpAMUP_GavqL2S2-kC25w-3A53G/exec";
+        let globalDataSiswa = null; 
+        let lastQueryNis = ""; 
+        let timerPencarian; 
+
+        // --- SISTEM MODAL KUSTOM ---
+        function showNotification(title, message, emoji = '🔔') {
+            const modal = document.getElementById('custom-modal');
+            const modalBox = document.getElementById('modal-box');
+            
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerHTML = message;
+            document.getElementById('modal-icon').innerText = emoji;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalBox.classList.remove('scale-95');
+                modalBox.classList.add('scale-100');
+            }, 50);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('custom-modal');
+            const modalBox = document.getElementById('modal-box');
+            
+            modalBox.classList.remove('scale-100');
+            modalBox.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+
+            // OPTIMASI BARU: Jika nama peserta kosong (pencarian gagal/belum sukses),
+            // maka kosongkan kolom NIS dan reset state setelah tombol "Mengerti" diklik.
+            const nameInput = document.getElementById('login-nama');
+            if (nameInput && nameInput.value === "") {
+                const nisInput = document.getElementById('login-nis');
+                if (nisInput) {
+                    nisInput.value = "";
+                }
+                resetLoginState();
+            }
+        }
+
+        // --- SISTEM PENANGANAN ERROR KONEKSI / CORS ---
+        function handleFetchError(error) {
+            console.error("Detail Error:", error);
+            
+            const petunjukSolusi = `
+                <div class="space-y-2 text-center">
+                    <p class="text-red-600 font-semibold">Gagal Mengakses Basis Data (Spreadsheet).</p>
+                    <p class="text-xs text-gray-700">Ini biasanya dikarenakan Anda belum mengganti <b>API_URL</b> atau pengaturan akses web app belum disetel ke <b>Anyone</b>.</p>
+                </div>
+            `;
+            showNotification("Koneksi Gagal", petunjukSolusi, "⚠️");
+        }
+
+        // --- LIMITASI 4 DIGIT ANGKA & INPUT NIS ---
+        function handleNisInput(input) {
+            let val = input.value.replace(/[^0-9]/g, '');
+            if (val.length > 4) {
+                val = val.slice(0, 4);
+            }
+            input.value = val;
+
+            if (val.length === 4) {
+                autoFindName(val);
+            } else {
+                resetLoginState();
+            }
+        }
+
+        // --- RESET STATUS TOMBOL & KOLOM NAMA ---
+        function resetLoginState() {
+            const nameInput = document.getElementById('login-nama');
+            const btnSubmit = document.getElementById('btn-submit-login');
+            
+            nameInput.value = "";
+            nameInput.placeholder = "Masukkan NIS terlebih dahulu...";
+            btnSubmit.disabled = true;
+            btnSubmit.className = "w-full py-4 text-white font-bold rounded-xl btn-3d mt-2 opacity-50 cursor-not-allowed transition-all duration-300";
+            lastQueryNis = "";
+            globalDataSiswa = null;
+        }
+
+        // --- AUTO-FILL NAMA SISWA SAAT LOGIN NIS PAS 4 DIGIT ---
+        function autoFindName(nis) {
+            const nameInput = document.getElementById('login-nama');
+            const btnSubmit = document.getElementById('btn-submit-login');
+            const loader = document.getElementById('login-loader');
+
+            if (nis === lastQueryNis) return;
+
+            clearTimeout(timerPencarian);
+            timerPencarian = setTimeout(async () => {
+                lastQueryNis = nis;
+                loader.classList.remove('hidden');
+                nameInput.value = "";
+                nameInput.placeholder = "Mencari data di database TKA...";
+
+                // Mengirim parameter pencarian yang bersih dari spasi
+                const cleanNis = encodeURIComponent(nis.toString().trim());
+
+                try {
+                    const response = await fetch(`${API_URL}?nis=${cleanNis}`, {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    const result = await response.json();
+
+                    if (result && result.NamaPeserta && !result.error) { 
+                        nameInput.value = result.NamaPeserta;
+                        btnSubmit.disabled = false;
+                        btnSubmit.className = "w-full py-4 text-white font-bold rounded-xl btn-3d mt-2 opacity-100 cursor-pointer animate-pulse transition-all duration-300";
+                        
+                        globalDataSiswa = result;
+                        showNotification("Sistem Informasi", `NIS ditemukan dalam database TKA!<br>Atas nama: <b>${result.NamaPeserta}</b>`, "✅");
+                        
+                        setTimeout(() => {
+                            btnSubmit.classList.remove('animate-pulse');
+                        }, 1000);
+                    } else {
+                        resetLoginState();
+                        nameInput.placeholder = "NIS tidak terdaftar dalam database!";
+                        const errorMsg = result.error ? result.error : "Data NIS tidak ditemukan pada database TKA!";
+                        showNotification("Tidak Ditemukan", errorMsg, "⚠️");
+                    }
+                } catch (error) {
+                    resetLoginState();
+                    nameInput.placeholder = "Gagal memuat data!";
+                    handleFetchError(error);
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            }, 300);
+        }
+
+        // --- PROSES TRANSISI MASUK KE SISTEM PENCARIAN ---
+        function handleLoginSuccess() {
+            const namaSiswa = document.getElementById('login-nama').value;
+            const nisSiswa = document.getElementById('login-nis').value;
+            
+            if(!namaSiswa || !globalDataSiswa) return;
+
+            showNotification(
+                "Sistem Terbuka", 
+                `Selamat Datang, <b>${namaSiswa}</b>! Sistem TKA telah terbuka. Anda sekarang dialihkan ke halaman Pencarian & Cetak.`, 
+                "🎉"
+            );
+
+            document.getElementById('page-login').classList.add('hidden');
+            document.getElementById('tab-navigation').classList.remove('hidden');
+            document.getElementById('page-search').classList.remove('hidden');
+
+            document.getElementById('search-nis').value = nisSiswa;
+            isiTabelHasil(globalDataSiswa);
+        }
+
+        // --- NAVIGASI ANTAR TAB ---
+        function switchMenu(menu) {
+            const tabLogin = document.getElementById('tab-login');
+            const tabSearch = document.getElementById('tab-search');
+            const pageSearch = document.getElementById('page-search');
+
+            if(menu === 'login') {
+                tabLogin.className = "w-1/2 py-2.5 rounded-xl font-bold text-center text-blue-900 bg-white shadow-inner transition-all duration-300 cursor-pointer";
+                tabSearch.className = "w-1/2 py-2.5 rounded-xl font-bold text-center text-gray-500 hover:text-blue-900 transition-all duration-300 cursor-pointer";
+                
+                if(globalDataSiswa) {
+                    isiTabelHasil(globalDataSiswa);
+                }
+                pageSearch.classList.remove('hidden');
+            } else {
+                tabSearch.className = "w-1/2 py-2.5 rounded-xl font-bold text-center text-blue-900 bg-white shadow-inner transition-all duration-300 cursor-pointer";
+                tabLogin.className = "w-1/2 py-2.5 rounded-xl font-bold text-center text-gray-500 hover:text-blue-900 transition-all duration-300 cursor-pointer";
+                
+                document.getElementById('search-nis').value = "";
+                document.getElementById('result-container').classList.add('hidden');
+                pageSearch.classList.remove('hidden');
+            }
+        }
+
+        // --- ISI TABEL HASIL PENCARIAN ---
+        function isiTabelHasil(data) {
+            const tableBody = document.getElementById('table-body');
+            const container = document.getElementById('result-container');
+            
+            tableBody.innerHTML = `
+                <tr class="border-b border-gray-100"><td class="p-2 text-gray-400">No. Induk (Kolom B)</td><td class="p-2 font-semibold">${data.NoIndukNISN || '-'}</td></tr>
+                <tr class="border-b border-gray-100"><td class="p-2 text-gray-400">Nama Peserta</td><td class="p-2 font-semibold">${data.NamaPeserta || '-'}</td></tr>
+                <tr class="border-b border-gray-100"><td class="p-2 text-gray-400">No. Peserta TKA</td><td class="p-2 font-semibold">${data.NoPesertaTKA || '-'}</td></tr>
+                <tr class="border-b border-gray-100"><td class="p-2 text-gray-400">Jenis Kelamin</td><td class="p-2 font-semibold">${data.JK || '-'}</td></tr>
+                <tr class="border-b border-gray-100"><td class="p-2 text-gray-400">Tempat Lahir</td><td class="p-2 font-semibold">${data.TempatLahir || '-'}</td></tr>
+                <tr class="border-b border-gray-100"><td class="p-2 text-gray-400">Tanggal Lahir</td><td class="p-2 font-semibold">${data.Lahir || '-'}</td></tr>
+                <tr><td class="p-2 text-gray-400">Nama Orang Tua</td><td class="p-2 font-semibold">${data.NamaOrangTua || '-'}</td></tr>
+            `;
+            container.classList.remove('hidden');
+        }
+
+        // --- PENCARIAN MANUAL NIS SISWA LAIN ---
+        async function searchData() {
+            const nis = document.getElementById('search-nis').value;
+            const loader = document.getElementById('search-loader');
+            const container = document.getElementById('result-container');
+            const errorMsg = document.getElementById('search-error');
+
+            if (!nis) {
+                showNotification("Perhatian", "Silakan masukkan NIS terlebih dahulu!", "⚠️");
+                return;
+            }
+
+            loader.classList.remove('hidden');
+            container.classList.add('hidden');
+            errorMsg.classList.add('hidden');
+
+            const cleanNis = encodeURIComponent(nis.toString().trim());
+
+            try {
+                const response = await fetch(`${API_URL}?nis=${cleanNis}`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                const data = await response.json();
+
+                if (data && data.NoIndukNISN && !data.error) {
+                    isiTabelHasil(data);
+                } else {
+                    errorMsg.innerText = data.error ? data.error : "Data NIS tidak ditemukan pada database TKA!";
+                    errorMsg.classList.remove('hidden');
+                    container.classList.add('hidden');
+                }
+            } catch (error) {
+                errorMsg.innerText = "Gagal memuat data dari server!";
+                errorMsg.classList.remove('hidden');
+                container.classList.add('hidden');
+                handleFetchError(error);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        // --- AKSI KEMBALI KE LOGIN SECARA OTOMATIS ---
+        function kembaliKeLogin() {
+            // Bersihkan input NIS login
+            const nisInput = document.getElementById('login-nis');
+            if (nisInput) {
+                nisInput.value = "";
+            }
+            resetLoginState();
+
+            // Sembunyikan navigasi dan halaman pencarian/profil, lalu tunjukkan kembali halaman login
+            document.getElementById('page-login').classList.remove('hidden');
+            document.getElementById('tab-navigation').classList.add('hidden');
+            document.getElementById('page-search').classList.add('hidden');
+        }
+
+        // --- AKSI TOMBOL LIHAT TKA & SHTKA ---
+        function actionTKA() {
+            if(!globalDataSiswa) {
+                showNotification("Akses Ditolak", "Data siswa tidak ditemukan.", "⚠️");
+                return;
+            }
+            // Mengarahkan ke situs resmi TKA pada tab baru
+            window.open("https://tka.kemendikdasmen.go.id/", "_blank");
+
+            // Kembali ke menu login siswa
+            kembaliKeLogin();
+        }
+
+        // --- AKSI TOMBOL SHTKA ---
+        function actionSHTKA() {
+            if(!globalDataSiswa) {
+                showNotification("Akses Ditolak", "Data siswa tidak ditemukan.", "⚠️");
+                return;
+            }
+            // Mengarahkan ke situs resmi SHTKA pada tab baru
+            window.open("https://shtka.kemendikdasmen.go.id/", "_blank");
+
+            // Kembali ke menu login siswa
+            kembaliKeLogin();
+        }
+    </script>
+</body>
+</html>
