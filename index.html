@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web TKA - SMP Diponegoro Sampang</title>
+    
+    <!-- Favicon Kustom Berbasis SVG dengan Tulisan "URIP" -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' rx='30' fill='%231e40af'/><text x='50%25' y='62%25' font-family='Poppins, Arial, sans-serif' font-weight='800' font-size='32' fill='%23ffffff' text-anchor='middle'>URIP</text></svg>">
+    
     <!-- Tailwind CSS v4 Play CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -388,7 +392,7 @@
             if (!printWindow) {
                 showNotification(
                     "Pop-up Diblokir", 
-                    "Harap izinkan jendela pop-up pada peramban Anda untuk mencetak Surat Keterangan Hasil TKA.", 
+                    "Harap izinkan jendela pop-up pada peramban Anda untuk melihat berkas Hasil TKA.", 
                     "⚠️"
                 );
                 return;
@@ -437,23 +441,13 @@
                                 page-break-inside: avoid !important;
                             }
                         }
-                        .kop-surat-ganda {
-                            border-bottom: 4px solid #000;
-                            position: relative;
-                        }
-                        .kop-surat-ganda::after {
-                            content: "";
-                            display: block;
-                            border-bottom: 1px solid #000;
-                            margin-top: 2px;
-                        }
                     </style>
                 </head>
                 <body class="bg-gray-100 p-6 flex flex-col items-center">
                     
-                    <!-- Tombol Pencetakan Melayang (Tidak ikut tercetak) -->
+                    <!-- Tombol Pencetakan Melayang (Hanya untuk aksi di web, tidak ikut tercetak) -->
                     <div class="no-print mb-4 w-[210mm] flex justify-between items-center bg-blue-50 border border-blue-200 p-3 rounded-xl shadow-md font-sans">
-                        <span class="text-xs text-blue-800 font-medium">📄 Dokumen ini adalah <b>Surat Keterangan Resmi</b> hasil TKA. Anda dapat langsung mencetak atau menyimpannya sebagai berkas PDF.</span>
+                        <span class="text-xs text-blue-800 font-medium">📄 Dokumen ini adalah <b>Surat Keterangan Resmi</b> hasil TKA. Anda dapat mencetaknya langsung melalui tombol di sebelah kanan.</span>
                         <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-5 rounded-lg shadow cursor-pointer transition-all flex items-center gap-2">
                             🖨️ Cetak Surat Resmi
                         </button>
@@ -484,7 +478,7 @@
                             <!-- JUDUL & NOMOR SURAT -->
                             <div class="text-center mb-6">
                                 <h2 class="text-lg font-bold tracking-wide underline uppercase">SURAT KETERANGAN HASIL TES KEMAMPUAN AKADEMIK (HTKA)</h2>
-                                
+                                <p class="text-sm font-sans text-gray-700 mt-1">Nomor: 421.3 / 118 / SMP-DP / V / 2026</p>
                             </div>
                             
                             <!-- PARAGRAF PEMBUKA -->
@@ -501,12 +495,12 @@
                                         <td class="font-bold text-gray-900 uppercase">${formatNama}</td>
                                     </tr>
                                     <tr class="h-6">
-                                        <td class="w-48 font-semibold">NIS</td>
+                                        <td class="w-48 font-semibold">Nomor Induk Siswa (NIS)</td>
                                         <td class="w-4 text-center">:</td>
                                         <td>${data.NoIndukNIS || '-'}</td>
                                     </tr>
                                     <tr class="h-6">
-                                        <td class="w-48 font-semibold">NISN</td>
+                                        <td class="w-48 font-semibold">Nomor Induk Siswa Nasional (NISN)</td>
                                         <td class="w-4 text-center">:</td>
                                         <td class="font-bold">${data.NoIndukNISN || '-'}</td>
                                     </tr>
@@ -583,12 +577,6 @@
                         </div>
                         
                     </div>
-                    
-                    <script>
-                        window.onload = function() {
-                            setTimeout(function() { window.print(); }, 500);
-                        };
-                    <\/script>
                 </body>
                 </html>
             `);
