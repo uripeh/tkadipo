@@ -388,7 +388,7 @@
             if (!printWindow) {
                 showNotification(
                     "Pop-up Diblokir", 
-                    "Harap izinkan jendela pop-up pada peramban Anda untuk melihat berkas Hasil TKA.", 
+                    "Harap izinkan jendela pop-up pada peramban Anda untuk mencetak Surat Keterangan Hasil TKA.", 
                     "⚠️"
                 );
                 return;
@@ -437,13 +437,23 @@
                                 page-break-inside: avoid !important;
                             }
                         }
+                        .kop-surat-ganda {
+                            border-bottom: 4px solid #000;
+                            position: relative;
+                        }
+                        .kop-surat-ganda::after {
+                            content: "";
+                            display: block;
+                            border-bottom: 1px solid #000;
+                            margin-top: 2px;
+                        }
                     </style>
                 </head>
                 <body class="bg-gray-100 p-6 flex flex-col items-center">
                     
-                    <!-- Tombol Pencetakan Melayang (Hanya untuk aksi di web, tidak ikut tercetak) -->
+                    <!-- Tombol Pencetakan Melayang (Tidak ikut tercetak) -->
                     <div class="no-print mb-4 w-[210mm] flex justify-between items-center bg-blue-50 border border-blue-200 p-3 rounded-xl shadow-md font-sans">
-                        <span class="text-xs text-blue-800 font-medium">📄 Dokumen ini adalah <b>Surat Keterangan Resmi</b> hasil TKA. Anda dapat mencetaknya langsung melalui tombol di sebelah kanan.</span>
+                        <span class="text-xs text-blue-800 font-medium">📄 Dokumen ini adalah <b>Surat Keterangan Resmi</b> hasil TKA. Anda dapat langsung mencetak atau menyimpannya sebagai berkas PDF.</span>
                         <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-5 rounded-lg shadow cursor-pointer transition-all flex items-center gap-2">
                             🖨️ Cetak Surat Resmi
                         </button>
@@ -453,10 +463,34 @@
                     <div class="print-container w-[210mm] min-h-[297mm] bg-white p-[20mm] shadow-lg border border-gray-200 flex flex-col justify-between relative">
                         
                         <div>
+                            <!-- KOP SURAT RESMI SEKOLAH -->
+                            <div class="flex items-center gap-6 pb-2 mb-4 kop-surat-ganda">
+                                <!-- Logo Sekolah Gambar Asli Resmi SMP Diponegoro Sampang -->
+                                <div class="w-20 h-20 flex-shrink-0">
+                                    <img src="https://i.ibb.co.com/G4D06kBh/logodipo-trans.png" 
+                                         alt="Logo SMP Diponegoro Sampang" 
+                                         class="w-full h-full object-contain" 
+                                         onerror="this.onerror=null; this.src='https://placehold.co/100x100?text=LOGO';">
+                                </div>
+                                
+                                <div class="flex-grow text-center pr-12">
+                                    <h3 class="text-sm font-bold tracking-wider uppercase font-sans text-gray-800 leading-tight">YAYASAN AL MUKARROMAH SAMPANG</h3>
+                                    <h1 class="text-2xl font-bold tracking-wide uppercase font-sans text-blue-900 leading-snug">SMP DIPONEGORO SAMPANG</h1>
+                                    <p class="text-xs font-sans text-gray-600 mt-1">Status Terakreditasi | NSS: 203040 | NPSN: 20300486</p>
+                                    <p class="text-[10px] font-sans text-gray-500 mt-0.5">Alamat: Jl. Gerilya No. 70, Sampang, Cilacap, Jawa Tengah | Telp: (0282) 321554 | Kode Pos: 53273</p>
+                                </div>
+                            </div>
+                            
                             <!-- JUDUL & NOMOR SURAT -->
                             <div class="text-center mb-6">
-                                <h2 class="text-lg font-bold tracking-wide underline uppercase">HASIL TES KEMAMPUAN AKADEMIK (HTKA)</h2>
+                                <h2 class="text-lg font-bold tracking-wide underline uppercase">SURAT KETERANGAN HASIL TES KEMAMPUAN AKADEMIK (HTKA)</h2>
+                                
                             </div>
+                            
+                            <!-- PARAGRAF PEMBUKA -->
+                            <p class="text-sm text-gray-800 mb-4 leading-relaxed text-justify">
+                                Yang bertanda tangan di bawah ini, Kepala Sekolah SMP Diponegoro Sampang, Kabupaten Sampang, Provinsi Jawa Timur, menerangkan dengan sesungguhnya bahwa peserta didik yang tercantum di bawah ini:
+                            </p>
                             
                             <!-- BIODATA BERSTRUKTUR TABEL RAPI -->
                             <div class="mb-5 pl-4">
@@ -524,11 +558,37 @@
                             
                             <!-- PENUTUP SURAT -->
                             <p class="text-sm text-gray-800 leading-relaxed text-justify">
-                                Demikian Hasil Tes Kemampuan Akademik ini diberikan kepada yang bersangkutan sebagai dokumen bukti pencapaian akademis resmi dan agar dapat dipergunakan sebagaimana mestinya.
+                                Demikian Surat Keterangan Hasil Tes Kemampuan Akademik ini diberikan kepada yang bersangkutan sebagai dokumen bukti pencapaian akademis resmi dan agar dapat dipergunakan sebagaimana mestinya.
                             </p>
                         </div>
                         
+                        <!-- KOLOM LEGALISASI TANDA TANGAN (Bawah Kertas) -->
+                        <div class="flex justify-end text-sm mt-8 relative">
+                            <div class="text-center w-72 relative">
+                                <p class="text-gray-800">Sampang, ${tglCetak}</p>
+                                <p class="text-gray-800 font-semibold mt-1">Kepala SMP Diponegoro Sampang,</p>
+                                
+                                <!-- Container Tanda Tangan dan Stempel dengan Tinggi Tetap -->
+                                <div class="h-24 flex justify-center items-center relative my-1">
+                                    <!-- Gambar TTD & Cap Kepala Sekolah Asli (Menggantikan Watermark Statis sebelumnya) -->
+                                    <img src="https://i.ibb.co.com/7JHdK10Q/TTDCAPKASEK.png" 
+                                         alt="Tanda Tangan dan Cap Kepala Sekolah" 
+                                         class="h-32 absolute z-10 object-contain -top-4" 
+                                         onerror="this.onerror=null; this.style.display='none';">
+                                </div>
+                                
+                                <p class="font-bold text-gray-900 underline uppercase tracking-wide relative z-20">AHMAD MUTASIR, S.Pd.</p>
+                                <p class="text-xs text-gray-600 mt-0.5 font-sans relative z-20">NIP. 19780512 200501 1 003</p>
+                            </div>
+                        </div>
+                        
                     </div>
+                    
+                    <script>
+                        window.onload = function() {
+                            setTimeout(function() { window.print(); }, 500);
+                        };
+                    <\/script>
                 </body>
                 </html>
             `);
